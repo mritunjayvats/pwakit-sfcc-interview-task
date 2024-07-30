@@ -34,9 +34,7 @@
 		- Add to Wishlist Button
 		- Close Button
 
-	See screenshot - QuickView.png
-
-   ![QuickView](/Users/kirov/dev/forkpoint/pwakit-sfcc-interview-task/QuickView.png)
+   ![QuickView](QuickView.png)
    
 5. **Fetch Product Details:**
    - Ensure the modal fetches the correct product details from the backend.
