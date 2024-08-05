@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import React, {useRef} from 'react'
+import React, {useRef,useState} from 'react'
 import PropTypes from 'prop-types'
 import {HeartIcon, HeartSolidIcon} from '@salesforce/retail-react-app/app/components/icons'
 
@@ -17,7 +17,9 @@ import {
     Text,
     Stack,
     useMultiStyleConfig,
-    IconButton
+    IconButton,
+    Button,
+    useDisclosure
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 import DynamicImage from '@salesforce/retail-react-app/app/components/dynamic-image'
 
@@ -29,6 +31,7 @@ import {productUrlBuilder} from '@salesforce/retail-react-app/app/utils/url'
 import Link from '@salesforce/retail-react-app/app/components/link'
 import withRegistration from '@salesforce/retail-react-app/app/components/with-registration'
 import {useCurrency} from '@salesforce/retail-react-app/app/hooks'
+import QuickView from '../quick-view/index'
 
 const IconButtonWithRegistration = withRegistration(IconButton)
 
@@ -63,6 +66,7 @@ const ProductTile = (props) => {
         isFavourite,
         onFavouriteToggle,
         dynamicImageProps,
+        onItemQuantityChange,
         ...rest
     } = props
 
@@ -77,16 +81,23 @@ const ProductTile = (props) => {
     const {currency: activeCurrency} = useCurrency()
     const isFavouriteLoading = useRef(false)
     const styles = useMultiStyleConfig('ProductTile')
+    const [isHovered, setIsHovered] = useState(false)
+    const { isOpen, onOpen, onClose } = useDisclosure()
 
     return (
-        <Box {...styles.container}>
+        <Box {...styles.container}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            position="relative"
+        >
             <Link
                 data-testid="product-tile"
                 to={productUrlBuilder({id: productId}, intl.local)}
                 {...styles.link}
                 {...rest}
             >
-                <Box {...styles.imageWrapper}>
+                <Box {...styles.imageWrapper}
+                className={isHovered ? 'hovered' : ''}>
                     {image && (
                         <AspectRatio {...styles.image}>
                             <DynamicImage
@@ -165,6 +176,32 @@ const ProductTile = (props) => {
                     />
                 </Box>
             )}
+            {isHovered && (
+                <Button
+                    {...styles.hoverButton}
+                    onClick={onOpen}
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    transform="translate(-50%, -50%)"
+                    zIndex="1"
+                >
+                    Quick View
+                </Button>
+            )}
+            {isHovered && <Box {...styles.fadeBackground} />}
+            {/* <ProductView
+                        showFullLink={true}
+                        imageSize="sm"
+                        product={product}
+                        isLoading={false}
+                        {...props}
+                    /> */}
+            <QuickView
+                isOpen={isOpen}
+                onClose={onClose}
+                product={product}
+            />
         </Box>
     )
 }
@@ -172,6 +209,7 @@ const ProductTile = (props) => {
 ProductTile.displayName = 'ProductTile'
 
 ProductTile.propTypes = {
+
     /**
      * The product search hit that will be represented in this
      * component.
@@ -197,7 +235,8 @@ ProductTile.propTypes = {
         // Note: useEinstein() transforms snake_case property names from the API response to camelCase
         productName: PropTypes.string,
         productId: PropTypes.string,
-        hitType: PropTypes.string
+        hitType: PropTypes.string,
+        
     }),
     /**
      * Enable adding/removing product as a favourite.
@@ -213,7 +252,12 @@ ProductTile.propTypes = {
      * interacts with favourite icon/button.
      */
     onFavouriteToggle: PropTypes.func,
+    onItemQuantityChange: PropTypes.func,
     dynamicImageProps: PropTypes.object
+    // enableFavourite: PropTypes.bool,
+    // isFavourite: PropTypes.bool,
+    // onFavouriteToggle: PropTypes.func,
+    // dynamicImageProps: PropTypes.object
 }
 
 export default ProductTile
